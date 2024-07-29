@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 import '../CustomSelect/Styles.css'
@@ -15,26 +16,34 @@ const CustomSelect = ({
   onMenuOpen,
   onSearchHandler
 }) => {
-  const [selectedValue, setSelectedValue] = useState(value || []);
+  const [selectedValue, setSelectedValue] = useState(value || (isMulti ? [] : null));
   const [searchText, setSearchText] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+
 
   const handleSelect = (option) => {
-    
-    console.log(option)
-
+    let newValue;
     if (isMulti) {
-      setSelectedValue((prev) => [...prev, option]);
+      newValue = [...selectedValue, option];
+      setSelectedValue(newValue);
     } else {
-      setSelectedValue(option);
+      newValue = option;
+      setSelectedValue(newValue);
+      setMenuOpen(false);
     }
-    onChangeHandler(option);
-
-
+    onChangeHandler(newValue);
   };
 
-
   const handleClear = () => {
-    setSelectedValue(isMulti ? [] : null);
+    if (isMulti) {
+      const newValue = [];
+      setSelectedValue(newValue);
+      onChangeHandler(newValue);
+    } else {
+      setSelectedValue(null);
+      onChangeHandler(null);
+    }
   };
 
   const handleSearch = (e) => {
@@ -42,15 +51,28 @@ const CustomSelect = ({
     onSearchHandler(e.target.value);
   };
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const toggleMenu = () => {
+    if (!isDisabled) {
+      setMenuOpen(!menuOpen);
+      onMenuOpen();
+    }
+  };
+
+  const filteredOptions = options.filter(option => {
+    if (isGrouped) {
+      return option.options.some(item =>
+        item.label.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+    return option.label.toLowerCase().includes(searchText.toLowerCase());
+  });
+
 
   return (
   <div className='kzui-main'>
       <div className={`kzui-select ${isDisabled ? 'kzui-select--disabled' : ''}`}>
-      <div className="kzui-select__control" onClick={onMenuOpen}>
-        {isSearchable && (
+      <div className="kzui-select__control" onClick={toggleMenu}>
+        {isSearchable && menuOpen ? (
           <input
             type="text"
             className="kzui-select__search"
@@ -59,32 +81,45 @@ const CustomSelect = ({
             placeholder={selectedValue ? '' : placeholder}
             disabled={isDisabled}
           />
-        )}
-        {!isSearchable && selectedValue && (
-          <div className="kzui-select__value">{selectedValue.label}</div>
+        ) : (
+          <div className="kzui-select__value">
+            {isMulti
+              ? selectedValue.map(val => val.label).join(', ')
+              : selectedValue?.label || placeholder}
+          </div>
         )}
         {isClearable && selectedValue && (
           <button className="kzui-select__clear" onClick={handleClear}>Clear</button>
         )}
       </div>
-      <div className="kzui-select__menu">
-        {isGrouped
-          ? options.map(group => (
-              <div key={group.label} className="kzui-select__group">
-                <div className="kzui-select__group-label">{group.label}</div>
-                {group.options.map(option => (
-                  <div key={option.value} className="kzui-select__option" onClick={() => handleSelect(option)}>
-                    {option.label}
-                  </div>
-                ))}
-              </div>
-            ))
-          : filteredOptions.map(option => (
-              <div key={option.value} className="kzui-select__option" onClick={() => handleSelect(option)}>
-                {option.label}
-              </div>
-            ))}
-      </div>
+      {menuOpen && (
+        <div className="kzui-select__menu">
+          {isGrouped
+            ? filteredOptions.map(group => (
+                <div key={group.label} className="kzui-select__group">
+                  <div className="kzui-select__group-label">{group.label}</div>
+                  {group.options.map(option => (
+                    <div
+                      key={option.value}
+                      className="kzui-select__option"
+                      onClick={() => handleSelect(option)}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
+              ))
+            : filteredOptions.map(option => (
+                <div
+                  key={option.value}
+                  className="kzui-select__option"
+                  onClick={() => handleSelect(option)}
+                >
+                  {option.label}
+                </div>
+              ))}
+        </div>
+      )}
     </div>
   </div>
   );
