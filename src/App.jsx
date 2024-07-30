@@ -38,34 +38,24 @@ const groupedOptions = [
 ];
 
 const App = () => {
-  // const options =[
-  //   {value: "HTML", label: "HTML"},
-  //   {value: "CSS", label: "CSS"},
-  //   {value: "JavaScript", label: "JavaScript"},
-  //   {value: "ReactJS", label: "ReactJS"},
-  //   {value: "NodeJS", label: "NodeJS"},
-  //   {value: "MongoDB", label: "MongoDB"},
-  //   {value: "ExpressJS", label: "ExpressJS"},
-  //   {value: "Tailwind CSS", label: "Tailwind CSS"},
-  //   {value: "DaySi UI", label: "DaySi UI"},
-  // ]
+  
   return (
     <div className="kzui-body">
       <div className='kzui-title'>
       <h1>Custom Select Component</h1>
       </div>
     <CustomSelect
-    isClearable
-    isSearchable
-    isDisabled={false}
-    options={groupedOptions}
-    value={null}
-    placeholder="Select an option"
-    isGrouped
-    isMulti
-    onChangeHandler={(val) => console.log(val)}
-    onMenuOpen={() => console.log('Menu opened')}
-    onSearchHandler={(text) => console.log(text)}
+     isClearable
+     isSearchable
+     isDisabled={false}
+     options={groupedOptions}
+     value={null}
+     placeholder="Select an option"
+     isGrouped
+     isMulti
+     onChangeHandler={(val) => console.log('Selected:', val)}
+     onMenuOpen={() => console.log('Menu opened')}
+     onSearchHandler={(text) => console.log('Search text:', text)}
     >
 
     </CustomSelect>

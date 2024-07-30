@@ -38,10 +38,12 @@ margin-inline: auto;
   border: none;
   outline: none;
   height: 2rem;
+  background-color: rgb(255, 255, 255);
 }
 
 .kzui-select__value {
   flex-grow: 1;
+  color: rgb(255, 255, 255);
 }
 
 .kzui-select__clear {
@@ -74,8 +76,10 @@ margin-inline: auto;
 
 .kzui-select__group {
   padding: 5px;
+  
 }
 
 .kzui-select__group-label {
   font-weight: bold;
+
 }

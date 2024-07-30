@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../CustomSelect/Styles.css'
 
 const CustomSelect = ({
@@ -20,12 +20,18 @@ const CustomSelect = ({
   const [searchText, setSearchText] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
-
+  useEffect(() => {
+    setSelectedValue(value || (isMulti ? [] : null));
+  }, [value, isMulti]);
 
   const handleSelect = (option) => {
     let newValue;
     if (isMulti) {
-      newValue = [...selectedValue, option];
+      if (selectedValue.find(val => val.value === option.value)) {
+        newValue = selectedValue.filter(val => val.value !== option.value);
+      } else {
+        newValue = [...selectedValue, option];
+      }
       setSelectedValue(newValue);
     } else {
       newValue = option;
@@ -35,7 +41,8 @@ const CustomSelect = ({
     onChangeHandler(newValue);
   };
 
-  const handleClear = () => {
+  const handleClear = (e) => {
+    e.stopPropagation();
     if (isMulti) {
       const newValue = [];
       setSelectedValue(newValue);
@@ -54,23 +61,27 @@ const CustomSelect = ({
   const toggleMenu = () => {
     if (!isDisabled) {
       setMenuOpen(!menuOpen);
-      onMenuOpen();
+      if (!menuOpen) {
+        onMenuOpen();
+      }
     }
   };
 
-  const filteredOptions = options.filter(option => {
-    if (isGrouped) {
-      return option.options.some(item =>
-        item.label.toLowerCase().includes(searchText.toLowerCase())
+  const filteredOptions = isGrouped
+    ? options.map(group => ({
+        ...group,
+        options: group.options.filter(option =>
+          option.label.toLowerCase().includes(searchText.toLowerCase())
+        ),
+      })).filter(group => group.options.length > 0)
+    : options.filter(option =>
+        option.label.toLowerCase().includes(searchText.toLowerCase())
       );
-    }
-    return option.label.toLowerCase().includes(searchText.toLowerCase());
-  });
 
 
   return (
   <div className='kzui-main'>
-      <div className={`kzui-select ${isDisabled ? 'kzui-select--disabled' : ''}`}>
+         <div className={`kzui-select ${isDisabled ? 'kzui-select--disabled' : ''}`}>
       <div className="kzui-select__control" onClick={toggleMenu}>
         {isSearchable && menuOpen ? (
           <input
@@ -78,7 +89,7 @@ const CustomSelect = ({
             className="kzui-select__search"
             value={searchText}
             onChange={handleSearch}
-            placeholder={selectedValue ? '' : placeholder}
+            placeholder={placeholder}
             disabled={isDisabled}
           />
         ) : (
@@ -101,7 +112,7 @@ const CustomSelect = ({
                   {group.options.map(option => (
                     <div
                       key={option.value}
-                      className="kzui-select__option"
+                      className={`kzui-select__option ${isMulti && selectedValue.some(val => val.value === option.value) ? 'kzui-select__option--selected' : ''}`}
                       onClick={() => handleSelect(option)}
                     >
                       {option.label}
@@ -112,7 +123,7 @@ const CustomSelect = ({
             : filteredOptions.map(option => (
                 <div
                   key={option.value}
-                  className="kzui-select__option"
+                  className={`kzui-select__option ${isMulti && selectedValue.some(val => val.value === option.value) ? 'kzui-select__option--selected' : ''}`}
                   onClick={() => handleSelect(option)}
                 >
                   {option.label}
